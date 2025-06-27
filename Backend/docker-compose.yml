@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: seniorassist
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/seniorassist
+      OPENAI_API_KEY: ${OPENAI_API_KEY} # You will need to set this in Render
+    depends_on:
+      - db
+      - duckling
+
+  duckling:
+    image: rasa/duckling:latest
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+
+volumes:
+  postgres_data:
