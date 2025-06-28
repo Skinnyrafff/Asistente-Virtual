@@ -1,42 +1,20 @@
-import aiosqlite
-import os
+from sqlalchemy.orm import Session
 from datetime import datetime
+from app.services.database import HealthRecord
 
-# Ruta a la base de datos unificada
-DB_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "database", "seniorassist.db")
-)
-
-
-async def save_health_data(
-    user_id: str, parameter: str, value: str, timestamp: str = None
-) -> int:
+def save_health_data(
+    db: Session, user_id: str, parameter: str, value: str, timestamp: str = None
+) -> HealthRecord:
     """Guarda un nuevo registro de salud en la base de datos."""
     if timestamp is None:
         timestamp = datetime.now().isoformat()
 
-    async with aiosqlite.connect(DB_PATH) as db:
-        cursor = await db.execute(
-            """INSERT INTO health_records (user_id, parameter, value, timestamp)
-               VALUES (?, ?, ?, ?)""",
-            (user_id, parameter, value, timestamp),
-        )
-        await db.commit()
-        return cursor.lastrowid
+    db_health_record = HealthRecord(user_id=user_id, parameter=parameter, value=value, timestamp=timestamp)
+    db.add(db_health_record)
+    db.commit()
+    db.refresh(db_health_record)
+    return db_health_record
 
-
-async def get_health_data(user_id: str) -> list:
+def get_health_data(db: Session, user_id: str) -> list[HealthRecord]:
     """Obtiene todos los registros de salud de un usuario."""
-    async with aiosqlite.connect(DB_PATH) as db:
-        cursor = await db.execute(
-            """SELECT id, parameter, value, timestamp
-               FROM health_records
-               WHERE user_id = ?
-               ORDER BY timestamp DESC""",
-            (user_id,),
-        )
-        rows = await cursor.fetchall()
-        return [
-            {"id": row[0], "parameter": row[1], "value": row[2], "timestamp": row[3]}
-            for row in rows
-        ]
+    return db.query(HealthRecord).filter(HealthRecord.user_id == user_id).order_by(HealthRecord.timestamp.desc()).all()
