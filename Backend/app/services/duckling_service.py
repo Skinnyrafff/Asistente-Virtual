@@ -1,9 +1,6 @@
 import httpx
 
 
-import httpx
-
-
 async def extract_dates_with_duckling(text: str) -> list:
     print(f"[🔍 Duckling] Texto recibido: {text}")
 
