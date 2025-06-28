@@ -5,3 +5,7 @@ openai
 python-dotenv
 psycopg2-binary
 sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+aiosqlite
