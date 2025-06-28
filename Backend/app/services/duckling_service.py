@@ -1,7 +1,8 @@
 import httpx
 
 
-from app.config import settings
+import httpx
+
 
 async def extract_dates_with_duckling(text: str) -> list:
     print(f"[🔍 Duckling] Texto recibido: {text}")
@@ -9,7 +10,7 @@ async def extract_dates_with_duckling(text: str) -> list:
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{settings.DUCKLING_URL}/parse",
+                "http://localhost:8001/parse",
                 data={
                     "text": text,
                     "locale": "es_ES",

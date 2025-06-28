@@ -30,7 +30,3 @@ def get_health_records_api(user_id: str, db: Session = Depends(get_db)):
             detail="No se encontraron registros de salud para este usuario.",
         )
     return records
-
-@router.get("/health")
-def health_check():
-    return {"status": "ok", "message": "API is healthy"}

@@ -1,13 +1,10 @@
-FROM python:3.13-slim
+FROM python:3.10-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy the entire backend directory content into the container at /app
 COPY . .
-
-# Clean up any __pycache__ directories or .pyc files
-RUN find . -type d -name "__pycache__" -exec rm -rf {} + && find . -type f -name "*.pyc" -delete
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt

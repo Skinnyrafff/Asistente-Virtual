@@ -1,1 +1,1 @@
-Fix: Add missing __init__.py to app/models
+Config: Add clean railway.toml for Railway deployment
