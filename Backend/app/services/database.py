@@ -1,11 +1,13 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, Index
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from .config import settings
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from app.config import settings
+from datetime import datetime
 
 engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 # Define the User model
 class User(Base):
@@ -23,6 +25,10 @@ class Reminder(Base):
     text = Column(Text, nullable=False)
     datetime = Column(String, nullable=False)
 
+    __table_args__ = (
+        Index('idx_reminders_user_id', user_id),
+    )
+
 # Define the HealthRecord model
 class HealthRecord(Base):
     __tablename__ = "health_records"
@@ -32,8 +38,23 @@ class HealthRecord(Base):
     value = Column(String, nullable=False)
     timestamp = Column(String, nullable=False)
 
-# Create an index for the user_id column in the reminders table
-Index('idx_reminders_user_id', Reminder.user_id)
+# Define the Emergency model
+class Emergency(Base):
+    __tablename__ = "emergencies"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    tipo_emergencia = Column(String, nullable=False)
+    mensaje_opcional = Column(Text)
+    timestamp = Column(String, nullable=False)
+
+# Define the ConversationHistory model
+class ConversationHistory(Base):
+    __tablename__ = "conversation_history"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    role = Column(String, nullable=False) # 'user' or 'assistant'
+    content = Column(Text, nullable=False)
+    timestamp = Column(String, default=datetime.now().isoformat(), nullable=False)
 
 # Function to create all tables
 def create_tables():
