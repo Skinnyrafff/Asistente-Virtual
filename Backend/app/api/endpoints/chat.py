@@ -22,8 +22,9 @@ async def chat_endpoint(input: ChatInput, db: Session = Depends(get_db)):
         llm_output = await llm_service.generate_response(input.message, fechas_detectadas, input.conversation_history)
         intencion = llm_output.get("intencion", "CONVERSACION_GENERAL")
         respuesta_llm = llm_output.get("respuesta", "Lo siento, no pude generar una respuesta.")
+        emocion = llm_output.get("emocion", "Neutra") # Extraer la emoción
 
-        print(f"[DEBUG] Intención detectada por LLM: {intencion}")
+        print(f"[DEBUG] Intención detectada por LLM: {intencion}, Emoción: {emocion}")
 
         # 3. Redirigir acciones según la intención
         if intencion == "RECORDATORIO":
@@ -62,7 +63,7 @@ async def chat_endpoint(input: ChatInput, db: Session = Depends(get_db)):
         db.commit()
 
         # 5. Devolver la respuesta al frontend
-        return {"respuesta": respuesta_llm, "fechas_detectadas": fechas_detectadas}
+        return {"respuesta": respuesta_llm, "fechas_detectadas": fechas_detectadas, "emocion": emocion}
 
     except Exception as e:
         print(f"[❌ CHAT_ENDPOINT ERROR] {e}")

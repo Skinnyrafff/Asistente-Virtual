@@ -11,6 +11,7 @@ class ChatInput(BaseModel):
 class ChatResponse(BaseModel):
     respuesta: str
     fechas_detectadas: list
+    emocion: str # Nuevo campo para la emoción detectada
 
 
 # Esquemas para Recordatorios (Reminders)
