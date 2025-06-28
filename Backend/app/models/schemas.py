@@ -1,16 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional, List
-
-
-# Esquemas para Chat
-class MessageHistoryItem(BaseModel):
-    role: str  # 'user' or 'assistant'
-    content: str
+from .chat_schemas import ConversationItem
 
 class ChatInput(BaseModel):
     message: str
     user_id: str
-    conversation_history: List[MessageHistoryItem] = []
+    conversation_history: List[ConversationItem] = []
 
 
 class ChatResponse(BaseModel):
