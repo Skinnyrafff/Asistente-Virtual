@@ -1,34 +1,36 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from typing import List
 from app.services import health_service
 from app.models.schemas import HealthRecord, HealthRecordCreate
+from app.services.database import get_db
 
 router = APIRouter()
 
 
 @router.post("/health/", response_model=HealthRecord)
-async def save_health_record_api(record: HealthRecordCreate):
+def save_health_record_api(record: HealthRecordCreate, db: Session = Depends(get_db)):
     """Guarda un nuevo registro de salud."""
-    await health_service.save_health_data(
+    return health_service.save_health_data(
+        db=db,
         user_id=record.user_id,
         parameter=record.parameter,
         value=record.value,
         timestamp=record.timestamp
     )
-    # El timestamp se genera en el servicio si es None, así que lo recuperamos para la respuesta
-    new_record = await health_service.get_health_data(
-        record.user_id
-    )  # Asumiendo que el último es el nuevo
-    return new_record[0]
 
 
 @router.get("/health/{user_id}", response_model=List[HealthRecord])
-async def get_health_records_api(user_id: str):
+def get_health_records_api(user_id: str, db: Session = Depends(get_db)):
     """Obtiene todos los registros de salud de un usuario."""
-    records = await health_service.get_health_data(user_id)
+    records = health_service.get_health_data(db, user_id)
     if not records:
         raise HTTPException(
             status_code=404,
             detail="No se encontraron registros de salud para este usuario.",
         )
     return records
+
+@router.get("/health")
+def health_check():
+    return {"status": "ok", "message": "API is healthy"}
