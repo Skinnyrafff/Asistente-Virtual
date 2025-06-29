@@ -22,7 +22,7 @@ def registrar_emergencia_api(emergency: EmergencyCreate, db: Session = Depends(g
 @router.get("/emergency/{user_id}", response_model=List[Emergency])
 def obtener_emergencias_api(user_id: str, db: Session = Depends(get_db)):
     """Obtiene todos los registros de emergencia de un usuario."""
-    emergencies = emergency_service.obtener_emergencias(db, user_id)
+    emergencies = emergency_service.obtener_emergencias(db, current_user.username)
     if not emergencies:
         raise HTTPException(
             status_code=404,

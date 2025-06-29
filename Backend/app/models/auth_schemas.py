@@ -14,3 +14,11 @@ class UserLogin(BaseModel):
 class UserProfileUpdate(BaseModel):
     age: Optional[int] = None
     city: Optional[str] = None
+
+class User(BaseModel):
+    username: str
+    age: int
+    city: str
+
+    class Config:
+        from_attributes = True

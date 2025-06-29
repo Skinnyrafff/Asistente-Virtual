@@ -28,7 +28,7 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        await setUsername(data.username, data.age, data.city);
+        await setUsername(data.username, data.age, data.city, data.access_token);
         router.replace('/(tabs)/home'); // Redirigir a la pantalla principal con tabs
       } else {
         const errorData = await response.json();

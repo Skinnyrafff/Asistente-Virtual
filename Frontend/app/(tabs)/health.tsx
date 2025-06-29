@@ -32,7 +32,7 @@ type HealthRecord = { id: string; parameter: string; value: string; timestamp: s
 export default function HealthScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { username } = useUser();
+  const { username, token } = useUser();
 
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [filtered, setFiltered] = useState<HealthRecord[]>([]);
@@ -49,7 +49,9 @@ export default function HealthScreen() {
     if (!username) return;
     setLoading(true);
     try {
-      const res = await fetch(`${HEALTH_API_URL}/${encodeURIComponent(username)}`);
+      const res = await fetch(`${HEALTH_API_URL}/`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
       
       // Si la respuesta es 404 (No encontrado), es un caso válido (sin registros)
       if (res.status === 404) {
@@ -109,23 +111,26 @@ export default function HealthScreen() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: username, parameter, value }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ parameter, value }),
       });
       if (!res.ok) throw new Error();
       closeModal();
       fetchHealth();
-    } catch {
+    } catch (error) {
       Alert.alert('Error', editRecord ? 'No se pudo actualizar' : 'No se pudo crear');
     }
   };
 
-  /* const onDelete = (id: string) => {
+  const onDelete = (id: number) => {
     Alert.alert('Eliminar', '¿Eliminar este registro?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'OK', onPress: async () => {
         try {
-          const res = await fetch(`${HEALTH_API_URL}/${id}`, { method: 'DELETE' });
+          const res = await fetch(`${HEALTH_API_URL}/${id}`, { 
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
           if (!res.ok) throw new Error();
           fetchHealth();
         } catch {
@@ -133,7 +138,7 @@ export default function HealthScreen() {
         }
       }},
     ]);
-  }; */
+  };
 
   const renderItem = ({ item }: { item: HealthRecord }) => (
     <View style={styles.itemRow}>
@@ -145,9 +150,9 @@ export default function HealthScreen() {
       <TouchableOpacity onPress={() => openModal(item)} style={styles.actionIcon}>
         <Ionicons name="pencil-outline" size={20} color="#007e99" />
       </TouchableOpacity>
-      {/* <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.actionIcon}>
+      <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.actionIcon}>
         <Ionicons name="trash-outline" size={20} color="#d9534f" />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   );
 

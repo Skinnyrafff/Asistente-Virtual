@@ -1,9 +1,9 @@
 import json
-from openai import OpenAI
+from openai import AsyncOpenAI
 from app.config import settings
 from app.models.chat_schemas import ConversationItem
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 # Caché en memoria para respuestas del LLM
 llm_cache = {}

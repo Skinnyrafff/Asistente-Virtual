@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ const { width } = Dimensions.get('window');
 const FOOTER_HEIGHT = 60;
 import { API_URL } from '../../constants/Api';
 
-const CHAT_API_URL = `${API_URL}/chat/chat/`;
+const CHAT_API_URL = `${API_URL}/chat/`;
 
 type Message = {
   id: string;
@@ -22,7 +22,7 @@ type Message = {
 
 export default function ChatScreen() {
   const router = useRouter();
-  const { username } = useUser(); // Obtener el username del contexto
+  const { username, token } = useUser(); // Obtener el username y el token del contexto
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationHistory, setConversationHistory] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState('');
@@ -48,8 +48,8 @@ export default function ChatScreen() {
     try {
       const res = await fetch(CHAT_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.text, user_id: username, conversation_history: newConversationHistory }) // Enviar historial
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ message: userMsg.text, conversation_history: newConversationHistory }) // Enviar historial
       });
       const data = await res.json();
       // Log del JSON recibido para verificar la clave correcta

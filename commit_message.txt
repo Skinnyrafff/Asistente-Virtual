@@ -1,1 +1,6 @@
-Config: Add clean railway.toml for Railway deployment
+Feat: Optimize NLP for emotion detection and refined intention
+
+- Updated LLM system prompt to include emotion in JSON output.
+- Modified ChatResponse schema to include 'emocion' field.
+- Updated chat endpoint to extract and return 'emocion'.
+- Removed duplicate httpx import in duckling_service.py.

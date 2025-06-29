@@ -2,13 +2,17 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.models.schemas import ChatInput, ChatResponse
 from app.models.chat_schemas import ConversationItem
-from app.services import duckling_service, llm_service, reminder_service, emergency_service, health_service
-from app.services.database import get_db, ConversationHistory
+from app.services import duckling_service, llm_service, reminder_service, emergency_service, health_service, auth_service
+from app.services.database import get_db, ConversationHistory, User
 
 router = APIRouter()
 
-@router.post("/chat/", response_model=ChatResponse)
-async def chat_endpoint(input: ChatInput, db: Session = Depends(get_db)):
+@router.post("/", response_model=ChatResponse)
+async def chat_endpoint(
+    input: ChatInput, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(auth_service.get_current_user)
+):
     """
     Punto de entrada principal para la conversación.
     Analiza el mensaje, extrae fechas, clasifica la intención y genera una respuesta.
@@ -29,13 +33,20 @@ async def chat_endpoint(input: ChatInput, db: Session = Depends(get_db)):
         # 3. Redirigir acciones según la intención
         if intencion == "RECORDATORIO":
             if fechas_detectadas:
-                primera_fecha = fechas_detectadas[0]["value"]["value"]
-                reminder_service.add_reminder(
-                    db=db,
-                    user_id=input.user_id,
-                    text=input.message,
-                    reminder_time=primera_fecha
-                )
+                primera_fecha_str = fechas_detectadas[0]["value"]["value"]
+                try:
+                    primera_fecha = parser.parse(primera_fecha_str)
+                except ValueError:
+                    print(f"[DEBUG] No se pudo parsear la fecha: {primera_fecha_str}")
+                    primera_fecha = None
+
+                if primera_fecha:
+                    reminder_service.add_reminder(
+                        db=db,
+                        user_id=current_user.username,
+                        text=input.message,
+                        reminder_time=primera_fecha
+                    )
                 print(f"[DEBUG] Recordatorio guardado para {input.user_id} en {primera_fecha}")
             else:
                 print("[DEBUG] Intención RECORDATORIO pero sin fechas detectadas por Duckling.")
@@ -58,8 +69,8 @@ async def chat_endpoint(input: ChatInput, db: Session = Depends(get_db)):
             print(f"[DEBUG] Intención SALUD detectada. Lógica de guardado de salud iría aquí.")
 
         # 4. Guardar el historial de la conversación
-        db.add(ConversationHistory(user_id=input.user_id, role="user", content=input.message))
-        db.add(ConversationHistory(user_id=input.user_id, role="assistant", content=respuesta_llm))
+        db.add(ConversationHistory(user_id=current_user.username, role="user", content=input.message))
+        db.add(ConversationHistory(user_id=current_user.username, role="assistant", content=respuesta_llm))
         db.commit()
 
         # 5. Devolver la respuesta al frontend

@@ -28,30 +28,30 @@ import { API_URL } from '../../constants/Api';
 
 const REMINDERS_API_URL = `${API_URL}/reminders`;
 
-type Reminder = { id: string; message: string; date: string; full_json?: { detail?: string; time?: string } };
+type Reminder = { id: string; text: string; datetime: string; };
 
 export default function RemindersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { username } = useUser();
+  const { username, token } = useUser();
 
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState('');
-  const [detail, setDetail] = useState('');
   const [timeString, setTimeString] = useState('');
   const [showPicker, setShowPicker] = useState(false);
   const [pickerTime, setPickerTime] = useState(new Date());
   const [editingId, setEditingId] = useState<string | null>(null);
-  const detailRef = useRef<TextInput>(null);
 
   const fetchReminders = async () => {
-    if (!username) return;
+    if (!username || !token) return;
     setLoading(true);
     try {
-      const res = await fetch(`${REMINDERS_API_URL}/${encodeURIComponent(username)}`);
+      const res = await fetch(`${REMINDERS_API_URL}/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       
       if (res.status === 404) {
         setReminders([]);
@@ -68,11 +68,10 @@ export default function RemindersScreen() {
     }
   };
 
-  useEffect(() => { fetchReminders(); }, [selectedDate, username]);
+  useEffect(() => { fetchReminders(); }, [selectedDate, username, token]);
 
   const resetForm = () => {
     setMessage('');
-    setDetail('');
     setTimeString('');
     setEditingId(null);
   };
@@ -81,13 +80,27 @@ export default function RemindersScreen() {
   const closeModal = () => { setShowModal(false); resetForm(); };
 
   const onSubmit = async () => {
-    if (!username) return;
+    if (!username || !token) return;
     if (!message.trim()) return Alert.alert('Error', 'El mensaje es requerido');
-    const body = { user_id: username, message, date: selectedDate, full_json: { detail, time: timeString } };
+
+    let reminderDateTime = `${selectedDate}T00:00:00`; // Default to midnight if no time selected
+    if (timeString) {
+      reminderDateTime = `${selectedDate}T${timeString}:00`;
+    }
+
+    const body = {
+      text: message.trim(),
+      datetime: reminderDateTime,
+    };
+
     const url = editingId ? `${REMINDERS_API_URL}/${editingId}` : `${REMINDERS_API_URL}/`;
     const method = editingId ? 'PUT' : 'POST';
     try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
       if (!res.ok) throw new Error();
       closeModal();
       fetchReminders();
@@ -100,7 +113,7 @@ export default function RemindersScreen() {
     Alert.alert('Eliminar', '¿Eliminar este recordatorio?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'OK', onPress: async () => {
-        try { await fetch(`${REMINDERS_API_URL}/${id}`, { method: 'DELETE' }); fetchReminders(); }
+        try { await fetch(`${REMINDERS_API_URL}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); fetchReminders(); }
         catch { Alert.alert('Error', 'No se pudo eliminar'); }
       }},
     ]);
@@ -108,14 +121,13 @@ export default function RemindersScreen() {
 
   const onEdit = (item: Reminder) => {
     setEditingId(item.id);
-    setMessage(item.message);
-    setDetail(item.full_json?.detail || '');
-    if (item.full_json?.time) {
-      setTimeString(item.full_json.time);
-      const [h, m] = item.full_json.time.split(':').map(Number);
-      const dt = new Date(); dt.setHours(h); dt.setMinutes(m);
-      setPickerTime(dt);
-    }
+    setMessage(item.text);
+
+    const dt = new Date(item.datetime);
+    setSelectedDate(dt.toISOString().split('T')[0]);
+    setTimeString(dt.toTimeString().substring(0, 5));
+
+    setPickerTime(dt);
     setShowModal(true);
   };
 
@@ -129,17 +141,16 @@ export default function RemindersScreen() {
   };
 
   const markedDates: Record<string, any> = {};
-  reminders.forEach(r => { markedDates[r.date] = { ...(markedDates[r.date]||{}), marked:true, dotColor:'#00B2A9' }; });
+  reminders.forEach(r => { markedDates[r.datetime.split('T')[0]] = { ...(markedDates[r.datetime.split('T')[0]]||{}), marked:true, dotColor:'#00B2A9' }; });
   markedDates[selectedDate] = { ...(markedDates[selectedDate]||{}), selected:true, selectedColor:'#00529B' };
-  const filtered = reminders.filter(r => r.date === selectedDate);
+  const filtered = reminders.filter(r => r.datetime.split('T')[0] === selectedDate);
 
   const renderItem = ({ item }: { item: Reminder }) => (
     <View style={styles.itemRow}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.itemTitle}>{item.message}</Text>
-        {!!item.full_json?.detail && <Text style={styles.itemDetail}>{item.full_json.detail}</Text>}
+        <Text style={styles.itemTitle}>{item.text}</Text>
       </View>
-      {!!item.full_json?.time && <Text style={styles.itemTime}>{item.full_json.time}</Text>}
+      {!!item.datetime && <Text style={styles.itemTime}>{new Date(item.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>}
       <TouchableOpacity onPress={() => onEdit(item)} style={styles.actionIcon}>
         <Ionicons name="pencil-outline" size={22} color="#007e99" />
       </TouchableOpacity>
@@ -193,14 +204,7 @@ export default function RemindersScreen() {
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>{editingId ? 'Editar' : 'Nuevo'} Recordatorio</Text>
                 <TextInput style={styles.input} placeholder="Mensaje" value={message} onChangeText={setMessage} />
-                <TextInput
-                  ref={detailRef}
-                  style={[styles.input, { height: 60 }]}
-                  placeholder="Detalle (opcional)"
-                  value={detail}
-                  onChangeText={setDetail}
-                  multiline
-                />
+                
                 <TouchableOpacity onPress={() => setShowPicker(true)} style={[styles.input, { justifyContent: 'center' }]}>  
                   <Text style={{ color: timeString ? '#000' : '#888' }}>{timeString || 'Selecciona hora'}</Text>
                 </TouchableOpacity>
