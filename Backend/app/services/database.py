@@ -47,6 +47,19 @@ class Emergency(Base):
     mensaje_opcional = Column(Text)
     timestamp = Column(String, nullable=False)
 
+# Define the EmergencyContact model
+class EmergencyContact(Base):
+    __tablename__ = "emergency_contacts"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    name = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    relationship = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('idx_emergency_contacts_user_id', user_id),
+    )
+
 # Define the ConversationHistory model
 class ConversationHistory(Base):
     __tablename__ = "conversation_history"

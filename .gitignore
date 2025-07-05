@@ -48,3 +48,7 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
+
+# Ignored by Gemini
+Backend/comandos.txt
+Frontend/assets/images/Captura de pantalla 2025-07-03 134624.png

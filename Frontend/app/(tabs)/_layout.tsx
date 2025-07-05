@@ -1,46 +1,64 @@
-// app/(tabs)/_layout.tsx
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
 import { Colors } from '../../constants/Colors';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: Colors.app.headerGradientEnd }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: Colors.light.tint,
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E2E8F0',
+          height: 75,
+          paddingBottom: 10,
+        },
+      }}
+    >
       <Tabs.Screen
-        name="home"       // coincide con home.tsx
+        name="chat"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"       // coincide con chat.tsx
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="reminders"
         options={{
-          title: 'Recordatorios',
-          tabBarIcon: ({ color, size }) => <Ionicons name="alarm-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'alarm' : 'alarm-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={focused ? 36 : 28} color={focused ? Colors.light.tint : Colors.app.darkText} />
+          ),
+          tabBarLabel: 'Home', // Add a label for clarity
         }}
       />
       <Tabs.Screen
         name="health"
         options={{
-          title: 'Salud',
-          tabBarIcon: ({ color, size }) => <Ionicons name="heart-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="emergency"
         options={{
-          title: 'Emergencia',
-          tabBarIcon: ({ color, size }) => <Ionicons name="warning-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'warning' : 'warning-outline'} size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
