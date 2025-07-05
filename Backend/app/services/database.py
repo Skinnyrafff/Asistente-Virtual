@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, Index
+from sqlalchemy import create_engine, Column, Integer, String, Text, Index, DateTime
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import settings
 from datetime import datetime
@@ -47,6 +47,19 @@ class Emergency(Base):
     mensaje_opcional = Column(Text)
     timestamp = Column(String, nullable=False)
 
+# Define the EmergencyContact model
+class EmergencyContact(Base):
+    __tablename__ = "emergency_contacts"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    name = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    relationship = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('idx_emergency_contacts_user_id', user_id),
+    )
+
 # Define the ConversationHistory model
 class ConversationHistory(Base):
     __tablename__ = "conversation_history"
@@ -54,7 +67,7 @@ class ConversationHistory(Base):
     user_id = Column(String, index=True)
     role = Column(String, nullable=False) # 'user' or 'assistant'
     content = Column(Text, nullable=False)
-    timestamp = Column(String, default=datetime.now().isoformat(), nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 # Function to create all tables
 def create_tables():

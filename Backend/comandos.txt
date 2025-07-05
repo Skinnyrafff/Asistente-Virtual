@@ -1,0 +1,22 @@
+ ERROR  SyntaxError: C:\Users\rafae\Desktop\Asistente-Virtual\Frontend\app\(tabs)\health.tsx: Missing catch or finally clause. (109:4)
+
+  107 |     const method = editRecord ? 'PUT' : 'POST';
+  108 |     const url = editRecord ? `${HEALTH_API_URL}/${editRecord.id}` : `${HEALTH_API_URL}/`;
+> 109 |     try {
+      |     ^
+  110 |       try {
+  111 |       const res = await fetch(url, {
+  112 |         method,
+ ERROR  [Error: TransformError SyntaxError: C:\Users\rafae\Desktop\Asistente-Virtual\Frontend\app\(tabs)\health.tsx: Missing catch or finally clause. (109:4)
+
+  107 |     const method = editRecord ? 'PUT' : 'POST';
+  108 |     const url = editRecord ? `${HEALTH_API_URL}/${editRecord.id}` : `${HEALTH_API_URL}/`;
+> 109 |     try {
+      |     ^
+  110 |       try {
+  111 |       const res = await fetch(url, {
+  112 |         method,]
+› Reloading apps
+
+INFO:     192.168.1.172:57294 - "POST /health/ HTTP/1.1" 200 OK
+INFO:     192.168.1.172:57294 - "GET /health/ HTTP/1.1" 401 Unauthorized

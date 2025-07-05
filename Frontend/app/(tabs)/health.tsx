@@ -32,14 +32,14 @@ type HealthRecord = { id: string; parameter: string; value: string; timestamp: s
 export default function HealthScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { username } = useUser();
+  const { username, token } = useUser();
 
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [filtered, setFiltered] = useState<HealthRecord[]>([]);
   const [page, setPage] = useState(1);
   const [parameter, setParameter] = useState('');
   const [value, setValue] = useState('');
-  const [filterText, setFilterText] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editRecord, setEditRecord] = useState<HealthRecord | null>(null);
@@ -49,7 +49,9 @@ export default function HealthScreen() {
     if (!username) return;
     setLoading(true);
     try {
-      const res = await fetch(`${HEALTH_API_URL}/${encodeURIComponent(username)}`);
+      const res = await fetch(`${HEALTH_API_URL}/`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
       
       // Si la respuesta es 404 (No encontrado), es un caso válido (sin registros)
       if (res.status === 404) {
@@ -78,12 +80,16 @@ export default function HealthScreen() {
   const pageData = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = filtered.length > page * PAGE_SIZE;
 
-  // Filter
+  // Sort
   useEffect(() => {
-    const lower = filterText.toLowerCase();
-    setFiltered(records.filter(r => r.parameter.toLowerCase().includes(lower)));
+    const sortedRecords = [...records].sort((a, b) => {
+      const dateA = new Date(a.timestamp).getTime();
+      const dateB = new Date(b.timestamp).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    setFiltered(sortedRecords);
     setPage(1);
-  }, [filterText, records]);
+  }, [sortOrder, records]);
 
   const openModal = (record?: HealthRecord) => {
     if (record) {
@@ -109,23 +115,26 @@ export default function HealthScreen() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: username, parameter, value }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ parameter, value }),
       });
       if (!res.ok) throw new Error();
       closeModal();
       fetchHealth();
-    } catch {
+    } catch (error) {
       Alert.alert('Error', editRecord ? 'No se pudo actualizar' : 'No se pudo crear');
     }
   };
 
-  /* const onDelete = (id: string) => {
+  const onDelete = (id: number) => {
     Alert.alert('Eliminar', '¿Eliminar este registro?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'OK', onPress: async () => {
         try {
-          const res = await fetch(`${HEALTH_API_URL}/${id}`, { method: 'DELETE' });
+          const res = await fetch(`${HEALTH_API_URL}/${id}`, { 
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
           if (!res.ok) throw new Error();
           fetchHealth();
         } catch {
@@ -133,7 +142,7 @@ export default function HealthScreen() {
         }
       }},
     ]);
-  }; */
+  };
 
   const renderItem = ({ item }: { item: HealthRecord }) => (
     <View style={styles.itemRow}>
@@ -145,9 +154,9 @@ export default function HealthScreen() {
       <TouchableOpacity onPress={() => openModal(item)} style={styles.actionIcon}>
         <Ionicons name="pencil-outline" size={20} color="#007e99" />
       </TouchableOpacity>
-      {/* <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.actionIcon}>
+      <TouchableOpacity onPress={() => onDelete(Number(item.id))} style={styles.actionIcon}>
         <Ionicons name="trash-outline" size={20} color="#d9534f" />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   );
 
@@ -155,24 +164,20 @@ export default function HealthScreen() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="auto" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)/home')}>
           <Ionicons name="arrow-back" size={26} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Salud</Text>
       </View>
+      <Text style={styles.screenDescription}>Lleva un registro de tus parámetros de salud importantes.</Text>
 
       <View style={styles.contentContainer}>
-        <View style={styles.filterContainer}>
-          <TextInput
-            style={styles.filterInput}
-            placeholder="Filtrar parámetro"
-            value={filterText}
-            onChangeText={setFilterText}
-          />
-          <TouchableOpacity style={styles.fab} onPress={() => openModal()}>
-            <Ionicons name="add" size={28} color="white" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.fabTextButton} onPress={() => openModal()}>
+          <Text style={styles.fabButtonText}>Haz click aquí para añadir un registro.</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.sortButton} onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+          <Text style={styles.sortButtonText}>Ordenar {sortOrder === 'asc' ? '↓' : '↑'}</Text>
+        </TouchableOpacity>
         {loading ? (
           <ActivityIndicator style={{ flex: 1 }} size="large" />
         ) : (
@@ -180,6 +185,13 @@ export default function HealthScreen() {
             data={pageData}
             keyExtractor={item => item.id}
             renderItem={renderItem}
+            ListEmptyComponent={
+              <View style={styles.emptyListContainer}>
+                <Ionicons name="clipboard-outline" size={50} color={Colors.app.gray2} />
+                <Text style={styles.emptyListText}>No hay registros de salud.</Text>
+                <Text style={styles.emptyListSubText}>Toca el botón &apos;+&apos; para añadir uno nuevo.</Text>
+              </View>
+            }
             ListFooterComponent={
               hasMore ? (
                 <TouchableOpacity onPress={() => setPage(prev => prev + 1)} style={styles.loadMore}>
@@ -230,27 +242,116 @@ import { Colors } from '../../constants/Colors';
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.app.lightGray, alignItems: 'center' },
-  header: { width: '100%', flexDirection:'row', alignItems:'center', backgroundColor: Colors.app.primary, paddingVertical:20, paddingHorizontal:16 },
-  headerTitle: { flex:1, color: Colors.app.white, fontSize:22, fontWeight:'700', marginLeft:16 },
+  header: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.light.tint,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    minHeight: 70,
+  },
+  headerTitle: { flex: 1, color: Colors.app.white, fontSize: 22, fontWeight: '700', marginLeft: 16 },
+  screenDescription: {
+    fontSize: 18,
+    color: Colors.app.darkText,
+    textAlign: 'center',
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    opacity: 0.7,
+  },
   contentContainer: { flex: 1, width: '100%', maxWidth: 800 },
-  filterContainer: { flexDirection:'row', alignItems:'center', padding:16, backgroundColor: Colors.app.white },
-  filterInput: { flex:1, borderWidth:1, borderColor: Colors.app.gray2, borderRadius:8, paddingHorizontal:12, paddingVertical:8, backgroundColor: Colors.app.gray3 },
-  fab: { marginLeft:8, backgroundColor: Colors.app.primary, width:48, height:48, borderRadius:24, justifyContent:'center', alignItems:'center' },
+  
+  sortButton: {
+    backgroundColor: Colors.app.white, // Cambiado a blanco
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    alignSelf: 'flex-end',
+    marginRight: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.tint, // Borde para que resalte sobre fondo blanco
+  },
+  sortButtonText: {
+    color: Colors.light.tint, // Texto con color del header
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  fabTextButton: {
+    backgroundColor: Colors.light.tint,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    maxWidth: '90%',
+    alignSelf: 'center',
+    marginBottom: 15,
+    width: '90%', // <-- añadido para igualar tamaño
+    minHeight: 48, // <-- añadido para igualar tamaño
+  },
+  fabButtonText: {
+    color: Colors.app.white,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   itemRow: { flexDirection:'row', alignItems:'center', backgroundColor: Colors.app.white, padding:12, borderRadius:8, marginVertical:4 },
   itemParam: { fontSize:16, fontWeight:'600', color: Colors.app.darkText },
   itemValue: { fontSize:14, color: Colors.app.mediumText, marginTop:4 },
   itemTime: { fontSize:12, color: Colors.app.primary, marginLeft:8 },
   actionIcon: { marginHorizontal:8 },
-  loadMore: { padding:12, alignItems:'center' },
-  loadMoreText: { color: Colors.app.primary, fontSize:16 },
+  loadMore: { 
+    padding:12, 
+    alignItems:'center',
+    backgroundColor: Colors.light.tint, // color igual al header
+    borderRadius: 8,
+    marginVertical: 8,
+  },
+  loadMoreText: { 
+    color: Colors.app.white, // texto blanco para contraste
+    fontSize:16 
+  },
   modalOverlay: { flex:1, backgroundColor:'rgba(0,0,0,0.5)', justifyContent:'center', alignItems:'center' },
   modalContainer: { width:'90%', maxWidth: 500 },
   modalContent: { backgroundColor: Colors.app.white, borderRadius:8, padding:16 },
   modalTitle: { fontSize:18, fontWeight:'600', marginBottom:12, color: Colors.app.secondary },
-  input: { borderWidth:1, borderColor: Colors.app.gray2, borderRadius:8, paddingHorizontal:12, paddingVertical:8, marginBottom:12, backgroundColor: Colors.app.gray3 },
+  input: { 
+    borderWidth:1, 
+    borderColor: Colors.app.gray2, 
+    borderRadius:8, 
+    paddingHorizontal:12, 
+    paddingVertical:8, 
+    marginBottom:12, 
+    backgroundColor: Colors.app.gray3, 
+    color: Colors.app.darkText, // Asegurar que el texto sea visible
+  },
   modalButtons: { flexDirection:'row', justifyContent:'flex-end' },
   cancelButton: { marginRight:12 },
   cancelText: { color: Colors.app.danger, fontSize:16 },
   saveButton: { backgroundColor: Colors.app.primary, paddingHorizontal:16, paddingVertical:8, borderRadius:8 },
   saveText: { color: Colors.app.white, fontSize:16, fontWeight:'600' },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 50,
+  },
+  emptyListText: {
+    fontSize: 20, // Increased font size
+    color: Colors.app.mediumText,
+    textAlign: 'center',
+    marginTop: 15, // Increased margin top
+  },
+  emptyListSubText: {
+    fontSize: 16, // Increased font size
+    color: Colors.app.gray2,
+    textAlign: 'center',
+    marginTop: 10, // Increased margin top
+    fontWeight: 'bold', // Made bolder
+  },
 });

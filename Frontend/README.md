@@ -1,50 +1,19 @@
-# Welcome to your Expo app 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+EL proyecto debe considerar funcionalidad de apoyo médico, en cuanto a un protocolo funcional que
+permita apoyar la necesidad de solicitar atención médica urgente. El protocolo funcional en el
+asistente virtual permitiría:
+● La capacidad de identificar palabras clave o frases que indiquen una emergencia, como
+&quot;ayuda&quot;, &quot;emergencia&quot;, &quot;no puedo respirar&quot;, etc.
+● En caso de detectar una situación de emergencia, el asistente debería:
+● Informar al usuario sobre la necesidad de buscar ayuda inmediata.
+● Proporcionar opciones para contactar a servicios de emergencia de manera rápida (por
+ejemplo, marcar un número de emergencia).
+● El asistente podría tener la opción de enviar alertas o mensajes a familiares o cuidadores
+designados, informándoles sobre la situación y la necesidad de atención médica.
+● Ofrecer información básica sobre primeros auxilios, si se considera seguro y adecuado,
+mientras se
+● Integración con Servicios de Emergencia:
+● Aunque no se desarrollaría un sistema de monitoreo en tiempo real, se podría
+considerar la posibilidad de integrar el asistente con servicios de emergencia locales
+para que pueda enviar alertas en caso de identificar una situación crítica.
+● Incluir una función que permita al usuario fácilmente acceder a información de contacto
+de servicios médicos, clínicas y hospitales cercanos

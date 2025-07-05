@@ -5,6 +5,7 @@ from app.api.endpoints.reminders import router as reminders_router
 from app.api.endpoints.health import router as health_router
 from app.api.endpoints.emergency import router as emergency_router
 from app.api.endpoints.auth import router as auth_router
+from app.api.endpoints.external import router as external_router
 from app.services.database import create_tables
 
 app = FastAPI(
@@ -35,3 +36,4 @@ app.include_router(reminders_router)
 app.include_router(health_router)
 app.include_router(emergency_router)
 app.include_router(auth_router, prefix="/auth", tags=["Autenticación"])
+app.include_router(external_router, prefix="/external", tags=["APIs Externas"])

@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from .chat_schemas import ConversationItem
+from datetime import datetime
 
 class ChatInput(BaseModel):
     message: str
-    user_id: str
     conversation_history: List[ConversationItem] = []
 
 
@@ -21,12 +21,11 @@ class ReminderBase(BaseModel):
 
 
 class ReminderCreate(ReminderBase):
-    user_id: str
+    pass
 
 
 class Reminder(ReminderBase):
     id: int
-    user_id: str
 
     class Config:
         from_attributes = True
@@ -38,23 +37,27 @@ class ReminderUpdate(BaseModel):
 
 
 # Esquemas para Salud (Health)
+from pydantic import BaseModel
+from datetime import datetime
+
 class HealthRecordBase(BaseModel):
     parameter: str
     value: str
 
-
 class HealthRecordCreate(HealthRecordBase):
-    user_id: str
-    timestamp: Optional[str] = None
+    timestamp: datetime | None = None
 
+class HealthRecordUpdate(HealthRecordBase):
+    pass
 
 class HealthRecord(HealthRecordBase):
     id: int
     user_id: str
-    timestamp: str
+    timestamp: datetime
 
     class Config:
         from_attributes = True
+
 
 
 # Esquemas para Emergencias (Emergency)
@@ -69,8 +72,7 @@ class EmergencyCreate(EmergencyBase):
 
 class Emergency(EmergencyBase):
     id: int
-    user_id: str
-    timestamp: str
+    timestamp: datetime
 
     class Config:
         from_attributes = True
