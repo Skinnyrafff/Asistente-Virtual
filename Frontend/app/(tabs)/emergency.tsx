@@ -69,6 +69,17 @@ export default function EmergencyScreen() {
     );
   };
 
+  const handleCallAmbulance = () => {
+    Alert.alert(
+      'Llamar a Ambulancia',
+      '¿Deseas llamar al 132 (SAMU)? 🚑',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Llamar Ambulancia', onPress: () => Linking.openURL('tel:132') }
+      ]
+    );
+  };
+
   const handleCallContact = (phoneNumber: string) => {
     Alert.alert(
       'Llamar a Contacto',
@@ -129,6 +140,10 @@ export default function EmergencyScreen() {
             <Ionicons name="shield-checkmark-outline" size={28} color="white" />
             <Text style={styles.buttonText}>Carabineros (133)</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonAmbulance]} onPress={handleCallAmbulance} accessibilityRole="button">
+            <Ionicons name="medkit-outline" size={28} color="white" />
+            <Text style={styles.buttonText}>Ambulancia (132)</Text>
+          </TouchableOpacity>
 
           <Text style={styles.sectionTitle}>Mis Contactos de Emergencia</Text>
           {emergencyContacts.length === 0 ? (
@@ -175,6 +190,7 @@ const styles = StyleSheet.create({
   button: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, paddingHorizontal: 20, borderRadius: 12, width: '80%', alignSelf: 'center', justifyContent: 'center', marginBottom: 24 },
   buttonBomberos: { backgroundColor: Colors.app.danger },
   buttonPolice: { backgroundColor: Colors.app.success },
+  buttonAmbulance: { backgroundColor: Colors.app.info }, // Style for Ambulance button
   buttonText: { color: Colors.app.white, fontSize: 18, marginLeft: 12, fontWeight: '600' },
 
   sectionTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.app.darkText, marginTop: 30, marginBottom: 15, textAlign: 'center' },

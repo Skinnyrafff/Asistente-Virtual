@@ -328,20 +328,20 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.app.lightGray },
-  header: { width: '100%', flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.light.tint, paddingVertical: 20, paddingHorizontal: 16, minHeight: 70 },
+  header: { width: '100%', flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.light.tint, paddingVertical: 20, paddingHorizontal: 16, minHeight: 70 }, // Added paddingTop
   headerTitle: { flex: 1, color: Colors.app.white, fontSize: 22, fontWeight: '700', marginLeft: 16 },
   scrollViewContent: { flex: 1, width: '100%' },
   contentContainer: { flex: 1, width: '100%', maxWidth: 500, padding: 20, alignSelf: 'center' },
   label: { fontSize: 16, fontWeight: 'bold', color: Colors.app.darkText, marginTop: 15, marginBottom: 5 },
   value: { fontSize: 18, color: Colors.app.mediumText, marginBottom: 15 },
   input: { width: '100%', borderWidth: 1, borderColor: Colors.app.gray1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: Colors.app.white, fontSize: 18, color: Colors.app.black, marginBottom: 10 },
-  saveButton: { backgroundColor: Colors.app.primary, paddingVertical: 14, borderRadius: 8, alignItems: 'center', marginTop: 30 },
+  saveButton: { backgroundColor: Colors.app.primary, paddingVertical: 16, borderRadius: 8, alignItems: 'center', marginTop: 30 },
   saveButtonText: { color: Colors.app.white, fontSize: 18, fontWeight: '600' },
 
   // Estilos para Contactos de Emergencia
   sectionContainer: { marginTop: 40, borderTopWidth: 1, borderTopColor: Colors.app.gray1, paddingTop: 20 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.app.darkText, marginBottom: 15 },
-  addButton: { backgroundColor: Colors.app.secondary, paddingVertical: 12, borderRadius: 8, alignItems: 'center', marginBottom: 20 },
+  addButton: { backgroundColor: Colors.app.primary, paddingVertical: 16, borderRadius: 8, alignItems: 'center', marginBottom: 20 },
   addButtonText: { color: Colors.app.white, fontSize: 16, fontWeight: '600' },
   noContactsText: { textAlign: 'center', color: Colors.app.mediumText, fontSize: 16, marginTop: 10 },
   contactItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.app.white, padding: 15, borderRadius: 8, marginBottom: 10, borderWidth: 1, borderColor: Colors.app.gray1 },
@@ -354,15 +354,15 @@ const styles = StyleSheet.create({
   modalContent: { width: '90%', maxWidth: 400, backgroundColor: Colors.app.white, borderRadius: 10, padding: 20, alignItems: 'center' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: Colors.app.darkText },
   modalButtons: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 20 },
-  modalButton: { paddingVertical: 12, paddingHorizontal: 25, borderRadius: 8, alignItems: 'center', flex: 1, marginHorizontal: 5 },
-  cancelButton: { backgroundColor: Colors.app.gray1 },
+  modalButton: { paddingVertical: 16, paddingHorizontal: 25, borderRadius: 8, alignItems: 'center', flex: 1, marginHorizontal: 5 },
+  cancelButton: { backgroundColor: Colors.app.primary },
   saveContactButton: { backgroundColor: Colors.app.primary },
   modalButtonText: { color: Colors.app.white, fontSize: 16, fontWeight: '600' },
 
   logoutButton: {
-    backgroundColor: Colors.app.red,
-    paddingVertical: 14,
-    borderRadius: 8,
+    backgroundColor: Colors.app.primary,
+    paddingVertical: 20, // Increased padding
+    borderRadius: 8, // Consistent with other buttons
     alignItems: 'center',
     marginTop: 30,
     marginBottom: 20,

@@ -1,0 +1,8 @@
+iOS Bundling failed 854ms node_modules\expo-router\entry.js (1384 modules)
+ ERROR  SyntaxError: C:\Users\rafae\Desktop\Asistente-Virtual\Frontend\app\onboarding\emergency-contact.tsx: Missing semicolon. (1:2)
+
+> 1 | '''import React, { useState } from 'react';
+    |   ^
+  2 | import {
+  3 |   TextInput,
+  4 |   TouchableOpacity,

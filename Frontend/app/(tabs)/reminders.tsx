@@ -20,17 +20,17 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as Notifications from 'expo-notifications';
+// import * as Notifications from 'expo-notifications'; // TODO: Futura implementación de notificaciones
 import { useRouter } from 'expo-router';
 import { useUser } from '../../context/UserContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage'; // TODO: Futura implementación de notificaciones
 
 const { width } = Dimensions.get('window');
 import { API_URL } from '../../constants/Api';
 
 const REMINDERS_API_URL = `${API_URL}/reminders`;
 
-type Reminder = { id: string; text: string; datetime: string; notificationId?: string };
+type Reminder = { id: string; text: string; datetime: string; /* notificationId?: string */ }; // TODO: Futura implementación de notificaciones
 
 export default function RemindersScreen() {
   const router = useRouter();
@@ -47,98 +47,102 @@ export default function RemindersScreen() {
   const [pickerTime, setPickerTime] = useState(new Date());
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Request notification permissions and set up notification handler
-  useEffect(() => {
-    (async () => {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        Alert.alert('Permiso de Notificaciones', 'Necesitamos tu permiso para mostrar recordatorios.');
-        return;
-      }
+  // TODO: Futura implementación de notificaciones
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== 'granted') {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== 'granted') {
+  //       Alert.alert('Permiso de Notificaciones', 'Necesitamos tu permiso para mostrar recordatorios.');
+  //       return;
+  //     }
 
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: false,
-        }),
-      });
-    })();
-  }, []);
+  //     Notifications.setNotificationHandler({
+  //       handleNotification: async () => ({
+  //         shouldShowAlert: true,
+  //         shouldPlaySound: true,
+  //         shouldSetBadge: false,
+  //       }),
+  //     });
+  //   })();
+  // }, []);
 
-  const scheduleNotification = async (reminder: Reminder) => {
-    const trigger = new Date(reminder.datetime);
-    if (isNaN(trigger.getTime())) {
-      console.error("Invalid date for notification trigger:", reminder.datetime);
-      return;
-    }
+  // const scheduleNotification = async (reminder: Reminder) => {
+  //   const triggerDate = new Date(reminder.datetime);
 
-    // Ensure the trigger is in the future
-    if (trigger.getTime() < Date.now()) {
-      console.warn("Attempted to schedule a notification for a past date:", reminder.datetime);
-      return;
-    }
+  //   if (isNaN(triggerDate.getTime())) {
+  //     console.error("Invalid date for notification trigger:", reminder.datetime);
+  //     return null;
+  //   }
 
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Recordatorio",
-        body: reminder.text,
-        sound: 'default', // Use default notification sound
-      },
-      trigger: {
-        date: trigger,
-      },
-    });
-    console.log("Notification scheduled with ID:", notificationId);
-    return notificationId;
-  };
+  //   // Ensure the trigger is in the future
+  //   if (triggerDate.getTime() < Date.now()) {
+  //     console.warn("Attempted to schedule a notification for a past date:", reminder.datetime);
+  //     return null;
+  //   }
 
-  const cancelNotification = async (notificationId: string) => {
-    if (notificationId) {
-      await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log("Notification cancelled with ID:", notificationId);
-    }
-  };
+  //   const notificationId = await Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: "Recordatorio",
+  //       body: reminder.text,
+  //       sound: 'default',
+  //     },
+  //     trigger: {
+  //       year: triggerDate.getFullYear(),
+  //       month: triggerDate.getMonth() + 1, // Month is 0-indexed in JS Date, 1-indexed in dateComponents
+  //       day: triggerDate.getDate(),
+  //       hour: triggerDate.getHours(),
+  //       minute: triggerDate.getMinutes(),
+  //     },
+  //   });
+  //   return notificationId;
+  // };
 
-  // AsyncStorage functions
-  const NOTIFICATION_IDS_KEY = 'notificationIds';
+  // const cancelNotification = async (notificationId: string) => {
+  //   if (notificationId) {
+  //     await Notifications.cancelScheduledNotificationAsync(notificationId);
+  //     console.log("Notification cancelled with ID:", notificationId);
+  //   }
+  // };
 
-  const saveNotificationId = async (reminderId: string, notificationId: string) => {
-    try {
-      const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
-      const ids = storedIds ? JSON.parse(storedIds) : {};
-      ids[reminderId] = notificationId;
-      await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
-    } catch (error) {
-      console.error("Error saving notification ID:", error);
-    }
-  };
+  // // AsyncStorage functions
+  // const NOTIFICATION_IDS_KEY = 'notificationIds';
 
-  const getNotificationIds = async (): Promise<Record<string, string>> => {
-    try {
-      const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
-      return storedIds ? JSON.parse(storedIds) : {};
-    } catch (error) {
-      console.error("Error getting notification IDs:", error);
-      return {};
-    }
-  };
+  // const saveNotificationId = async (reminderId: string, notificationId: string) => {
+  //   try {
+  //     const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
+  //     const ids = storedIds ? JSON.parse(storedIds) : {};
+  //     ids[reminderId] = notificationId;
+  //     await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
+  //   } catch (error) {
+  //     console.error("Error saving notification ID:", error);
+  //   }
+  // };
 
-  const removeNotificationId = async (reminderId: string) => {
-    try {
-      const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
-      const ids = storedIds ? JSON.parse(storedIds) : {};
-      delete ids[reminderId];
-      await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
-    } catch (error) {
-      console.error("Error removing notification ID:", error);
-    }
-  };
+  // const getNotificationIds = async (): Promise<Record<string, string>> => {
+  //   try {
+  //     const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
+  //     return storedIds ? JSON.parse(storedIds) : {};
+  //   } catch (error) {
+  //     console.error("Error getting notification IDs:", error);
+  //     return {};
+  //   }
+  // };
+
+  // const removeNotificationId = async (reminderId: string) => {
+  //   try {
+  //     const storedIds = await AsyncStorage.getItem(NOTIFICATION_IDS_KEY);
+  //     const ids = storedIds ? JSON.parse(storedIds) : {};
+  //     delete ids[reminderId];
+  //     await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
+  //   } catch (error) {
+  //     console.error("Error removing notification ID:", error);
+  //   }
+  // };
 
   const fetchReminders = async () => {
     if (!username || !token) return;
@@ -152,25 +156,26 @@ export default function RemindersScreen() {
         setReminders([]);
       } else if (res.ok) {
         const data: Reminder[] = await res.json();
-        const storedNotificationIds = await getNotificationIds();
+        // TODO: Futura implementación de notificaciones
+        // const storedNotificationIds = await getNotificationIds();
 
         // Re-schedule notifications for existing reminders if they are in the future
-        for (const reminder of data) {
-          const trigger = new Date(reminder.datetime);
-          if (trigger.getTime() > Date.now()) { // Only re-schedule if in the future
-            const existingNotificationId = storedNotificationIds[reminder.id];
-            if (existingNotificationId) {
-              // Optionally, cancel and re-schedule to ensure it's up-to-date
-              await cancelNotification(existingNotificationId);
-            }
-            const newNotificationId = await scheduleNotification(reminder);
-            if (newNotificationId) {
-              await saveNotificationId(reminder.id, newNotificationId);
-            }
-          } else { // If reminder is in the past, remove its notification ID
-            await removeNotificationId(reminder.id);
-          }
-        }
+        // for (const reminder of data) {
+        //   const trigger = new Date(reminder.datetime);
+        //   if (trigger.getTime() > Date.now()) { // Only re-schedule if in the future
+        //     const existingNotificationId = storedNotificationIds[reminder.id];
+        //     if (existingNotificationId) {
+        //       // Optionally, cancel and re-schedule to ensure it's up-to-date
+        //       await cancelNotification(existingNotificationId);
+        //     }
+        //     const newNotificationId = await scheduleNotification(reminder);
+        //     if (newNotificationId) {
+        //       await saveNotificationId(reminder.id, newNotificationId);
+        //     }
+        //   } else { // If reminder is in the past, remove its notification ID
+        //     await removeNotificationId(reminder.id);
+        //   }
+        // }
         setReminders(data);
       } else {
         throw new Error('Error del servidor');
@@ -188,6 +193,7 @@ export default function RemindersScreen() {
     setMessage('');
     setTimeString('');
     setEditingId(null);
+    setPickerTime(new Date()); // Reset pickerTime to current time
   };
 
   const openModal = () => { resetForm(); setShowModal(true); };
@@ -216,13 +222,14 @@ export default function RemindersScreen() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
-      const data = await res.json(); // Assuming backend returns the created/updated reminder
+      // TODO: Futura implementación de notificaciones
+      // const data = await res.json(); // Assuming backend returns the created/updated reminder
       
-      // Schedule notification and save ID
-      const notificationId = await scheduleNotification(data);
-      if (notificationId) {
-        await saveNotificationId(data.id, notificationId);
-      }
+      // // Schedule notification and save ID
+      // const notificationId = await scheduleNotification(data);
+      // if (notificationId) {
+      // //   await saveNotificationId(data.id, notificationId);
+      // }
 
       closeModal();
       fetchReminders();
@@ -236,12 +243,13 @@ export default function RemindersScreen() {
       { text: 'Cancelar', style: 'cancel' },
       { text: 'OK', onPress: async () => {
         try {
-          const notificationIds = await getNotificationIds();
-          const notificationId = notificationIds[id];
-          if (notificationId) {
-            await cancelNotification(notificationId);
-            await removeNotificationId(id);
-          }
+          // TODO: Futura implementación de notificaciones
+          // const notificationIds = await getNotificationIds();
+          // const notificationId = notificationIds[id];
+          // if (notificationId) {
+          //   await cancelNotification(notificationId);
+          //   await removeNotificationId(id);
+          // }
           await fetch(`${REMINDERS_API_URL}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
           fetchReminders();
         }

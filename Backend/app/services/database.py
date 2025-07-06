@@ -9,7 +9,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 
-# Define the User model
+# Aquí definimos el modelo user
 class User(Base):
     __tablename__ = "users"
     username = Column(String, primary_key=True, index=True)

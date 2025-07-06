@@ -15,6 +15,7 @@ export interface WeatherSummary {
 export interface NewsSummary {
   title: string;
   url: string;
+  source_id?: string; // Añadido para que coincida con la propiedad usada en home.tsx
 }
 
 export function useExternalSummaries(city: string | null) {
