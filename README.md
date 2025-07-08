@@ -1,7 +1,5 @@
 # Asistente Virtual - Aplicación Full-Stack
 
-![Asistente Virtual](https://raw.githubusercontent.com/your-username/your-repo/main/path/to/your/banner.png) <!-- Reemplaza con una imagen o banner si tienes uno -->
-
 Este repositorio contiene el código fuente de un Asistente Virtual completo, diseñado para ofrecer soporte y monitorización a usuarios, con un enfoque especial en el cuidado de adultos mayores. La solución se compone de un **backend** (API REST) y un **frontend** (aplicación móvil).
 
 ---
